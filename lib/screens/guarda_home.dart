@@ -7,9 +7,8 @@ import '../providers/guarda_provider.dart';
 const kAzul = Color(0xFF0A2F5C);
 const kRojo = Color(0xFFFF3333);
 
-//nelly
 class GuardaHome extends StatefulWidget {
-  final String guardaId; // email
+  final String guardaId;
   const GuardaHome({super.key, required this.guardaId});
 
   @override
@@ -68,9 +67,8 @@ class _GuardaHomeState extends State<GuardaHome> {
             final prov = context.read<GuardaProvider>();
             final guarda = context.watch<GuardaProvider>().guarda!;
 
-            // --- Avatar con token + base64 ---
             Widget avatar = FutureBuilder<Uint8List?>(
-              future: prov.descargarFotoPorEmail(guarda.id), // id = email
+              future: prov.descargarFotoPorEmail(guarda.id),
               builder: (_, s) {
                 final hasBytes = s.hasData && (s.data?.isNotEmpty ?? false);
                 final img = hasBytes
