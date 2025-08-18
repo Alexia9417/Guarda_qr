@@ -26,11 +26,29 @@ class QRUsuario {
       areas: List<String>.from(json['Areas'] ?? []),
       fechaVencimiento: DateTime.parse(json['FechaVencimiento']),
     );
+    
+  }
+  
+  bool coincideCon(Usuario otro) {
+    final idCoincide =
+        _normalizar(identificacion) == _normalizar(otro.identificacion);
+    final tipoCoincide =
+        _normalizar(tipoUsuarioDescripcion) == _normalizar(otro.tipoUsuario);
+    final nombreCoincide =
+        _normalizar(nombreCompleto) == _normalizar(otro.nombreCompleto);
+
+    return idCoincide && tipoCoincide && nombreCoincide;
   }
 
-  bool coincideCon(Usuario otro) {
-    return identificacion == otro.identificacion &&
-        tipoUsuarioDescripcion.toLowerCase() == otro.tipoUsuario.toLowerCase() &&
-        nombreCompleto.trim().toLowerCase() == otro.nombreCompleto.trim().toLowerCase();
+  String _normalizar(String texto) {
+    return texto
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAll(RegExp(r'[áÁ]'), 'a')
+        .replaceAll(RegExp(r'[éÉ]'), 'e')
+        .replaceAll(RegExp(r'[íÍ]'), 'i')
+        .replaceAll(RegExp(r'[óÓ]'), 'o')
+        .replaceAll(RegExp(r'[úÚ]'), 'u');
   }
 }

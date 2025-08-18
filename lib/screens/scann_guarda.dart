@@ -31,7 +31,7 @@ class _ScannGuardaState extends State<ScannGuarda> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                '⚠️ QR inválido. No contiene datos en formato esperado.',
+                'QR inválido. No contiene datos en formato esperado.',
               ),
               backgroundColor: Colors.red,
             ),

@@ -22,11 +22,11 @@ class Usuario {
             _str(j['SegundoApellido']),
           ].where((x) => x.isNotEmpty).join(' ').trim();
 
-    final identificacion = _str(
-      j['Identificacion'].toString().isNotEmpty
-          ? j['Identificacion']
-          : j['Cedula'],
+    final identificacion = _str(j['Identificacion']).isNotEmpty
+    ? _str(j['Identificacion'])
+    : _str(j['Cedula']
     );
+
 
     final tipoUsuario = _str(j['TipoUsuario'] ?? j['Tipo'] ?? j['tipoUsuario']);
 

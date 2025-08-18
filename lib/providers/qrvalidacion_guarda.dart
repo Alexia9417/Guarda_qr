@@ -32,7 +32,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       // Decodificar el JSON del QR
       final Map<String, dynamic> jsonQR = jsonDecode(widget.qrData);
       final usuarioQR = QRUsuario.fromJson(jsonQR);
-      
+
       // Función para construir el email del usuario
       String construirEmail(String id, String tipo) {
         final sufijo = tipo.toLowerCase() == 'estudiante'
@@ -40,14 +40,18 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
             : '@cuc.ac.cr';
         return '$id$sufijo';
       }
+
       // Obtener el proveedor de Usuario
       final usuarioProvider = Provider.of<UsuarioProvider>(
         context,
         listen: false,
       );
-      
+
       // Construir el email del usuario basado en la identificación y tipo
-      final email = construirEmail(usuarioQR.identificacion, usuarioQR.tipoUsuarioDescripcion);
+      final email = construirEmail(
+        usuarioQR.identificacion,
+        usuarioQR.tipoUsuarioDescripcion,
+      );
 
       // Cargar el usuario desde el proveedor
       await usuarioProvider.cargarPorId(email);
@@ -76,6 +80,13 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       // Validar coincidencia con el usuario cargado
       final usuarioBD = usuarioProvider.usuario;
 
+      if (usuarioBD == null) {
+        mensaje = 'usuarioBD es null';
+      } else {
+        debugPrint('usuarioBD.identificacion: ${usuarioBD.identificacion}');
+        debugPrint('usuarioBD.tipoUsuario: ${usuarioBD.tipoUsuario}');
+        debugPrint('usuarioBD.nombreCompleto: ${usuarioBD.nombreCompleto}');
+      }
       // Si no hay usuario cargado, mostrar error
       if (usuarioBD != null && usuarioQR.coincideCon(usuarioBD)) {
         await audioPlayer.stop(); // Detener cualquier reproducción previa
@@ -90,7 +101,10 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
         await audioPlayer.play(AssetSource('sonido_error.mp3'));
         setState(() {
           esValido = false;
-          mensaje = 'Usuario inválido';
+          mensaje =
+              'Usuario inválido: ID: ${usuarioQR.identificacion} vs ${usuarioBD?.identificacion}\n'
+              'Tipo: ${usuarioQR.tipoUsuarioDescripcion} vs ${usuarioBD?.tipoUsuario}\n'
+              'Nombre: ${usuarioQR.nombreCompleto} vs ${usuarioBD?.nombreCompleto}';
         });
       }
     } catch (e) {
