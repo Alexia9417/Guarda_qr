@@ -6,6 +6,7 @@ import '../providers/guarda_provider.dart';
 const kAzul = Color(0xFF0A2F5C);
 const kRojo = Color(0xFFFF3333);
 
+//nelly
 class GuardaHome extends StatefulWidget {
   final String guardaId; // email
   const GuardaHome({super.key, required this.guardaId});
