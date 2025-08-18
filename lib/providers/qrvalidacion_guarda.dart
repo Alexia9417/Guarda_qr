@@ -29,14 +29,28 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
   Future<void> _validarQR() async {
     try {
+      // Decodificar el JSON del QR
       final Map<String, dynamic> jsonQR = jsonDecode(widget.qrData);
       final usuarioQR = QRUsuario.fromJson(jsonQR);
-
+      
+      // Función para construir el email del usuario
+      String construirEmail(String id, String tipo) {
+        final sufijo = tipo.toLowerCase() == 'estudiante'
+            ? '@cuc.cr'
+            : '@cuc.ac.cr';
+        return '$id$sufijo';
+      }
+      // Obtener el proveedor de Usuario
       final usuarioProvider = Provider.of<UsuarioProvider>(
         context,
         listen: false,
       );
-      await usuarioProvider.cargarPorId(usuarioQR.identificacion);
+      
+      // Construir el email del usuario basado en la identificación y tipo
+      final email = construirEmail(usuarioQR.identificacion, usuarioQR.tipoUsuarioDescripcion);
+
+      // Cargar el usuario desde el proveedor
+      await usuarioProvider.cargarPorId(email);
 
       // Verificar si hubo error al cargar el usuario
       if (usuarioProvider.error != null) {
@@ -44,7 +58,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
         await audioPlayer.play(AssetSource('sonido_error.mp3'));
         setState(() {
           esValido = false;
-          mensaje = '⚠️ ${usuarioProvider.error}';
+          mensaje = '${usuarioProvider.error}';
         });
         return;
       }
@@ -55,7 +69,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
         await audioPlayer.play(AssetSource('sonido_error.mp3'));
         setState(() {
           esValido = false;
-          mensaje = '⚠️ QR expirado';
+          mensaje = 'QR expirado';
         });
         return;
       }
@@ -68,7 +82,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
         await audioPlayer.play(AssetSource('sonido_success.wav'));
         setState(() {
           esValido = true;
-          mensaje = '✅ Usuario válido';
+          mensaje = 'Usuario válido';
         });
       } else {
         // Si no coincide, mostrar error
@@ -76,7 +90,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
         await audioPlayer.play(AssetSource('sonido_error.mp3'));
         setState(() {
           esValido = false;
-          mensaje = '❌ Usuario inválido';
+          mensaje = 'Usuario inválido';
         });
       }
     } catch (e) {
@@ -85,7 +99,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       await audioPlayer.play(AssetSource('sonido_error.mp3'));
       setState(() {
         esValido = false;
-        mensaje = '⚠️ Error al procesar QR';
+        mensaje = 'Error al procesar QR';
       });
     }
   }
@@ -106,7 +120,12 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
     return Scaffold(
       backgroundColor: kAzul,
-      appBar: AppBar(title: const Text('Validación QR',style: TextStyle(color: Colors.white))),
+      appBar: AppBar(
+        title: const Text(
+          'Validación QR',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         color: fondo,
