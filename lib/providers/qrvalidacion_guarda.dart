@@ -80,17 +80,24 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       // Validar coincidencia con el usuario cargado
       final usuarioBD = usuarioProvider.usuario;
 
-      if (usuarioBD == null) {
-        mensaje = 'usuarioBD es null';
-      } else {
-        debugPrint('usuarioBD.identificacion: ${usuarioBD.identificacion}');
-        debugPrint('usuarioBD.tipoUsuario: ${usuarioBD.tipoUsuario}');
-        debugPrint('usuarioBD.nombreCompleto: ${usuarioBD.nombreCompleto}');
+      //
+      Future<void> reproducirYDetener(
+        AudioPlayer player,
+        String assetPath,
+        Duration duracion,
+      ) async {
+        await player.stop(); // Por si hay algo sonando
+        await player.play(AssetSource(assetPath));
+
+        Future.delayed(duracion, () async {
+          await player.stop();
+        });
       }
+
       // Si no hay usuario cargado, mostrar error
       if (usuarioBD != null && usuarioQR.coincideCon(usuarioBD)) {
         await audioPlayer.stop(); // Detener cualquier reproducción previa
-        await audioPlayer.play(AssetSource('sonido_success.wav'));
+        await reproducirYDetener(audioPlayer, 'sonido_success.wav', Duration(seconds: 5));
         setState(() {
           esValido = true;
           mensaje = 'Usuario válido';
@@ -101,10 +108,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
         await audioPlayer.play(AssetSource('sonido_error.mp3'));
         setState(() {
           esValido = false;
-          mensaje =
-              'Usuario inválido: ID: ${usuarioQR.identificacion} vs ${usuarioBD?.identificacion}\n'
-              'Tipo: ${usuarioQR.tipoUsuarioDescripcion} vs ${usuarioBD?.tipoUsuario}\n'
-              'Nombre: ${usuarioQR.nombreCompleto} vs ${usuarioBD?.nombreCompleto}';
+          mensaje = 'Usuario inválido';
         });
       }
     } catch (e) {

@@ -17,15 +17,12 @@ class Usuario {
     final nombreCompleto = _str(j['NombreCompleto']).isNotEmpty
         ? _str(j['NombreCompleto'])
         : [
-            _str(j['Nombre']),
-            _str(j['PrimerApellido']),
-            _str(j['SegundoApellido']),
+            _str(j['Nombre'] ?? j['nombre']),
+            _str(j['PrimerApellido'] ?? j['primerApellido']),
+            _str(j['SegundoApellido'] ?? j['segundoApellido']),
           ].where((x) => x.isNotEmpty).join(' ').trim();
 
-    final identificacion = _str(j['Identificacion']).isNotEmpty
-    ? _str(j['Identificacion'])
-    : _str(j['Cedula']
-    );
+    final identificacion = _str(j['Identificacion'] ?? j['identificacion']);
 
 
     final tipoUsuario = _str(j['TipoUsuario'] ?? j['Tipo'] ?? j['tipoUsuario']);
