@@ -40,7 +40,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
       // Verificar si hubo error al cargar el usuario
       if (usuarioProvider.error != null) {
-        await audioPlayer.play(AssetSource('sonido_error.mp3'));
+        await audioPlayer.play(AssetSource('assets/sonido_error.mp3'));
         setState(() {
           esValido = false;
           mensaje = '⚠️ ${usuarioProvider.error}';
@@ -50,7 +50,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
       // Verificar fecha de vencimiento
       if (usuarioQR.fechaVencimiento.isBefore(DateTime.now())) {
-        await audioPlayer.play(AssetSource('sonido_error.mp3'));
+        await audioPlayer.play(AssetSource('assets/sonido_error.mp3'));
         setState(() {
           esValido = false;
           mensaje = '⚠️ QR expirado';
@@ -62,20 +62,20 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
       // Si no hay usuario cargado, mostrar error
       if (usuarioBD != null && usuarioQR.coincideCon(usuarioBD)) {
-        await audioPlayer.play(AssetSource('lib/assets/sonido_success.wav'));
+        await audioPlayer.play(AssetSource('assets/sonido_success.wav'));
         setState(() {
           esValido = true;
           mensaje = '✅ Usuario válido';
         });
       } else {
-        await audioPlayer.play(AssetSource('lib/assets/sonido_error.mp3'));
+        await audioPlayer.play(AssetSource('assets/sonido_error.mp3'));
         setState(() {
           esValido = false;
           mensaje = '❌ Usuario inválido';
         });
       }
     } catch (e) {
-      await audioPlayer.play(AssetSource('lib/assets/sonido_error.mp3'));
+      await audioPlayer.play(AssetSource('assets/sonido_error.mp3'));
       setState(() {
         esValido = false;
         mensaje = '⚠️ Error al procesar QR';
