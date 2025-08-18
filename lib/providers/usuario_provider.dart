@@ -29,7 +29,7 @@ class UsuarioProvider extends ChangeNotifier {
   Future<void> _cargarGenerico(Uri uri) async {
     loading = true;
     error = null;
-    notifyListeners();
+    Future.microtask(() => notifyListeners());
     try {
       final res = await _http.get(uri);
       final bodyText = utf8.decode(res.bodyBytes);

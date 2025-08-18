@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:guardas_seguridad/screens/scann_guarda.dart';
 import 'package:provider/provider.dart';
 import '../providers/guarda_provider.dart';
 
@@ -36,7 +37,12 @@ class _GuardaHomeState extends State<GuardaHome> {
           IconButton(
             tooltip: 'Abrir cámara (escáner QR)',
             icon: const Icon(Icons.photo_camera, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ScannGuarda()),
+              );
+            },
           ),
         ],
       ),

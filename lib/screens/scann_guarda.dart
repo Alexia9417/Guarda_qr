@@ -27,14 +27,17 @@ class _ScannGuardaState extends State<ScannGuarda> {
       try {
         jsonDecode(raw); // Validar que sea JSON válido
       } catch (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              '⚠️ QR inválido. No contiene datos en formato esperado.',
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                '⚠️ QR inválido. No contiene datos en formato esperado.',
+              ),
+              backgroundColor: Colors.red,
             ),
-            backgroundColor: Colors.red,
-          ),
-        );
+          );
+        }
+        setState(() => _isProcessing = false); // Resetear estado
         return;
       }
 
@@ -44,9 +47,13 @@ class _ScannGuardaState extends State<ScannGuarda> {
           builder: (context) => QrvalidacionGuarda(qrData: raw),
         ),
       ).then((_) {
-        Future.delayed(const Duration(seconds: 1), () {
-          setState(() => _isProcessing = false);
-        });
+        if (mounted) {
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) {
+              setState(() => _isProcessing = false);
+            }
+          });
+        }
       });
     }
   }
@@ -54,7 +61,8 @@ class _ScannGuardaState extends State<ScannGuarda> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Escáner QR')),
+      backgroundColor: kAzul,
+      appBar: AppBar(title: const Text('Escáner QR', style: TextStyle(color: Colors.white))),
       body: Stack(
         children: [
           MobileScanner(onDetect: _onDetect),
@@ -90,17 +98,6 @@ class _ScannGuardaState extends State<ScannGuarda> {
               ),
             ),
           ),
-
-          // Animación de línea escaneando
-          Positioned(
-            top: MediaQuery.of(context).size.height / 2 - 125,
-            left: MediaQuery.of(context).size.width / 2 - 125,
-            child: SizedBox(
-              width: 250,
-              height: 250,
-              child: _ScanLineAnimation(color: kAzul),
-            ),
-          ),
         ],
       ),
     );
@@ -127,46 +124,4 @@ class _BorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _ScanLineAnimation extends StatefulWidget {
-  final Color color;
-  const _ScanLineAnimation({required this.color});
-
-  @override
-  State<_ScanLineAnimation> createState() => _ScanLineAnimationState();
-}
-
-class _ScanLineAnimationState extends State<_ScanLineAnimation>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-
-    _animation = Tween<double>(begin: 0, end: 250).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (_, __) => Positioned(
-        top: _animation.value,
-        child: Container(width: 250, height: 2, color: widget.color),
-      ),
-    );
-  }
 }

@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../models/qrusuario.dart';
 import '../providers/usuario_provider.dart';
 
+const kAzul = Color(0xFF003466);
+
 class QrvalidacionGuarda extends StatefulWidget {
   final String qrData;
 
@@ -60,20 +62,20 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
       // Si no hay usuario cargado, mostrar error
       if (usuarioBD != null && usuarioQR.coincideCon(usuarioBD)) {
-        await audioPlayer.play(AssetSource('sonido_success.wav'));
+        await audioPlayer.play(AssetSource('lib/assets/sonido_success.wav'));
         setState(() {
           esValido = true;
           mensaje = '✅ Usuario válido';
         });
       } else {
-        await audioPlayer.play(AssetSource('sonido_error.mp3'));
+        await audioPlayer.play(AssetSource('lib/assets/sonido_error.mp3'));
         setState(() {
           esValido = false;
           mensaje = '❌ Usuario inválido';
         });
       }
     } catch (e) {
-      await audioPlayer.play(AssetSource('sonido_error.mp3'));
+      await audioPlayer.play(AssetSource('lib/assets/sonido_error.mp3'));
       setState(() {
         esValido = false;
         mensaje = '⚠️ Error al procesar QR';
@@ -96,7 +98,8 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
         : Colors.red.shade700;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Validación QR')),
+      backgroundColor: kAzul,
+      appBar: AppBar(title: const Text('Validación QR',style: TextStyle(color: Colors.white))),
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         color: fondo,

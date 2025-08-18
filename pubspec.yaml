@@ -26,3 +26,7 @@ flutter:
   assets:
     - assets/logo_guardas.png
     - assets/persona.png
+    - lib/assets/sonido_error.mp3
+    - lib/assets/sonido_success.wav
+
+
