@@ -1,14 +1,14 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:guardas_seguridad/screens/scann_guarda.dart';
 import 'package:provider/provider.dart';
 import '../providers/guarda_provider.dart';
 
 const kAzul = Color(0xFF0A2F5C);
 const kRojo = Color(0xFFFF3333);
 
-//nelly
 class GuardaHome extends StatefulWidget {
-  final String guardaId; // email
+  final String guardaId;
   const GuardaHome({super.key, required this.guardaId});
 
   @override
@@ -36,7 +36,12 @@ class _GuardaHomeState extends State<GuardaHome> {
           IconButton(
             tooltip: 'Abrir cámara (escáner QR)',
             icon: const Icon(Icons.photo_camera, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ScannGuarda()),
+              );
+            },
           ),
         ],
       ),
@@ -62,9 +67,8 @@ class _GuardaHomeState extends State<GuardaHome> {
             final prov = context.read<GuardaProvider>();
             final guarda = context.watch<GuardaProvider>().guarda!;
 
-            // --- Avatar con token + base64 ---
             Widget avatar = FutureBuilder<Uint8List?>(
-              future: prov.descargarFotoPorEmail(guarda.id), // id = email
+              future: prov.descargarFotoPorEmail(guarda.id),
               builder: (_, s) {
                 final hasBytes = s.hasData && (s.data?.isNotEmpty ?? false);
                 final img = hasBytes
