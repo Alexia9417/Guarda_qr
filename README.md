@@ -1,0 +1,1 @@
+# Guarda_qr
