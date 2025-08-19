@@ -143,6 +143,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
           'Validación QR',
           style: TextStyle(color: Colors.white),
         ),
+        backgroundColor: kAzul,
       ),
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 500),

@@ -62,7 +62,9 @@ class _ScannGuardaState extends State<ScannGuarda> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kAzul,
-      appBar: AppBar(title: const Text('Escáner QR', style: TextStyle(color: Colors.white))),
+      appBar: AppBar(title: const Text('Escáner QR', style: TextStyle(color: Colors.white)),
+      backgroundColor: kAzul,
+      ),
       body: Stack(
         children: [
           MobileScanner(onDetect: _onDetect),
