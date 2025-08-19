@@ -35,7 +35,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
       // Función para construir el email del usuario
       String construirEmail(String id, String tipo) {
-        final sufijo = tipo.toLowerCase() == 'estudiante'
+        final sufijo = tipo == 'Estudiante'
             ? '@cuc.cr'
             : '@cuc.ac.cr';
         return '$id$sufijo';
