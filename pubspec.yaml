@@ -20,7 +20,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  
+  flutter_launcher_icons: ^0.14.4
+
 flutter:
   uses-material-design: true
   assets:
@@ -29,4 +30,8 @@ flutter:
     - assets/sonido_error.mp3
     - assets/sonido_success.wav
 
-
+flutter_icons:
+  android: true
+  ios: true
+  adaptive_icon_background: "#FFFFFF"     
+  adaptive_icon_foreground: "assets/guarda_seguridad.jpg"
