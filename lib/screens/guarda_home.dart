@@ -34,44 +34,54 @@ class _GuardaHomeState extends State<GuardaHome> {
         elevation: 0,
         title: const Text('Mi perfil', style: TextStyle(color: Colors.white)),
         actions: [
-          IconButton(
-            tooltip: 'Abrir cámara (escáner QR)',
-            icon: const Icon(Icons.photo_camera, color: Colors.white),
-            onPressed: () async {
-              final prov = context.read<GuardaProvider>();
-              final bytes = await prov.descargarFotoPorEmail(widget.guardaId);
+          FutureBuilder<Uint8List?>(
+            future: context.read<GuardaProvider>().descargarFotoPorEmail(
+              widget.guardaId,
+            ),
+            builder: (context, snapshot) {
+              final tieneFoto =
+                  snapshot.hasData && (snapshot.data?.isNotEmpty ?? false);
 
-              if (bytes == null || bytes.isEmpty) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'No puede usar la app hasta registrar su fotografía.',
-                      ),
-                    ),
-                  );
-                }
-                return;
-              }
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ScannGuarda()),
+              return Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Abrir cámara (escáner QR)',
+                    icon: const Icon(Icons.photo_camera, color: Colors.white),
+                    onPressed: tieneFoto
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ScannGuarda(),
+                              ),
+                            );
+                          }
+                        : () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No se validará el uso de esta aplicación hasta que haya registrado su fotografía.',
+                                ),
+                              ),
+                            );
+                          },
+                  ),
+                  IconButton(
+                    tooltip: 'Cerrar sesión',
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    onPressed: () async {
+                      await context.read<AuthProvider>().logout();
+                      if (context.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/login',
+                          (route) => false,
+                        );
+                      }
+                    },
+                  ),
+                ],
               );
-            },
-          ),
-          IconButton(
-            tooltip: 'Cerrar sesión',
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              await context.read<AuthProvider>().logout();
-              if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login',
-                  (route) => false,
-                );
-              }
             },
           ),
         ],

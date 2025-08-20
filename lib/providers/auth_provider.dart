@@ -1,4 +1,3 @@
-// lib/providers/auth_provider.dart
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -11,19 +10,15 @@ class AuthProvider extends ChangeNotifier {
 
   final SecureStorage _storage;
 
-  // Estado
   bool loading = false;
   String? error;
 
-  // Tokens / datos de sesión
   String? accessToken;
   String? refreshToken;
 
-  // Datos del usuario autenticado
-  String? usuarioId; // <-- lo usa tu Login directamente
-  String? tipoUsuario; // <-- agregado para que el Login valide "guarda"
+  String? usuarioId;
+  String? tipoUsuario;
 
-  // Alias útil para el Login (solo este getter)
   String? get token => accessToken;
 
   Future<bool> login(String email, String password) async {
@@ -37,7 +32,7 @@ class AuthProvider extends ChangeNotifier {
         'Accept': 'application/json',
         'email': email.trim(),
         'password': password,
-        'tipo_usuario': 'GuardasFE', // si tu backend lo requiere
+        'tipo_usuario': 'GuardasFE',
       };
 
       final res = await http.post(uri, headers: headers);
