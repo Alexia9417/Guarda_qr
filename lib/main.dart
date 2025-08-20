@@ -4,9 +4,12 @@ import 'package:provider/provider.dart';
 import 'core/secure_storage.dart';
 import 'providers/auth_provider.dart';
 import 'providers/usuario_provider.dart';
+
 import 'screens/login_guardas.dart';
+import 'screens/guarda_home.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 
@@ -16,15 +19,25 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final storage = SecureStorage();
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(storage)),
         ChangeNotifierProvider(create: (_) => UsuarioProvider(storage)),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         title: 'App de Guardas CUC',
         debugShowCheckedModeBanner: false,
-        home: Login(),
+
+        initialRoute: '/login',
+
+        routes: {
+          '/login': (_) => const LoginGuardas(),
+          '/home': (ctx) {
+            final guardaId = ModalRoute.of(ctx)!.settings.arguments as String;
+            return GuardaHome(guardaId: guardaId);
+          },
+        },
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:guardas_seguridad/screens/scann_guarda.dart';
 import 'package:provider/provider.dart';
 import '../providers/guarda_provider.dart';
+import '../providers/auth_provider.dart';
 
 const kAzul = Color(0xFF0A2F5C);
 const kRojo = Color(0xFFFF3333);
@@ -41,6 +42,20 @@ class _GuardaHomeState extends State<GuardaHome> {
                 context,
                 MaterialPageRoute(builder: (_) => const ScannGuarda()),
               );
+            },
+          ),
+          IconButton(
+            tooltip: 'Cerrar sesión',
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () async {
+              await context.read<AuthProvider>().logout();
+              if (context.mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login': (_) => const LoginState(),
+                  (route) => false,
+                );
+              }
             },
           ),
         ],
