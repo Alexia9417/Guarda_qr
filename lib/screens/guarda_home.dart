@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:guardas_seguridad/screens/scann_guarda.dart';
 import 'package:provider/provider.dart';
 import '../providers/guarda_provider.dart';
+import '../providers/auth_provider.dart';
 
 const kAzul = Color(0xFF0A2F5C);
 const kRojo = Color(0xFFFF3333);
@@ -33,13 +34,53 @@ class _GuardaHomeState extends State<GuardaHome> {
         elevation: 0,
         title: const Text('Mi perfil', style: TextStyle(color: Colors.white)),
         actions: [
-          IconButton(
-            tooltip: 'Abrir cámara (escáner QR)',
-            icon: const Icon(Icons.photo_camera, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ScannGuarda()),
+          FutureBuilder<Uint8List?>(
+            future: context.read<GuardaProvider>().descargarFotoPorEmail(
+              widget.guardaId,
+            ),
+            builder: (context, snapshot) {
+              final tieneFoto =
+                  snapshot.hasData && (snapshot.data?.isNotEmpty ?? false);
+
+              return Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Abrir cámara (escáner QR)',
+                    icon: const Icon(Icons.photo_camera, color: Colors.white),
+                    onPressed: tieneFoto
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ScannGuarda(),
+                              ),
+                            );
+                          }
+                        : () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No se validará el uso de esta aplicación hasta que haya registrado su fotografía.',
+                                ),
+                              ),
+                            );
+                          },
+                  ),
+                  IconButton(
+                    tooltip: 'Cerrar sesión',
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    onPressed: () async {
+                      await context.read<AuthProvider>().logout();
+                      if (context.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/login',
+                          (route) => false,
+                        );
+                      }
+                    },
+                  ),
+                ],
               );
             },
           ),

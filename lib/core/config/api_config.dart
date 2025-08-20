@@ -1,12 +1,6 @@
-import 'package:flutter/foundation.dart';
-
 class ApiConfig {
-  static const String _prod =
+  static const String baseUrl =
       'https://tiusr34pl.cuc-carrera-ti.ac.cr/ApiGateway/gateway';
-  static const String _dev =
-      'https://tiusr34pl.cuc-carrera-ti.ac.cr/ApiGateway/gateway';
-
-  static String get baseUrl => kReleaseMode ? _prod : _dev;
 
   static const Map<String, Map<String, String>> services = {
     'Auth': {
