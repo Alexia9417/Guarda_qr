@@ -21,7 +21,7 @@ class QRUsuario {
     return QRUsuario(
       nombreCompleto: json['NombreCompleto'] ?? '',
       identificacion: json['Identificacion'] ?? '',
-      tipoUsuarioDescripcion: json['TipoUsuarioDescripcion'] ?? '',
+      tipoUsuarioDescripcion: json['TipoUsuario'] ?? '',
       carreras: List<String>.from(json['Carreras'] ?? []),
       areas: List<String>.from(json['Areas'] ?? []),
       fechaVencimiento: DateTime.parse(json['FechaVencimiento']),

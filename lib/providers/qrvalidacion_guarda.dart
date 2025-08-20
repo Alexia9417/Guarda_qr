@@ -117,7 +117,7 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       await audioPlayer.play(AssetSource('sonido_error.mp3'));
       setState(() {
         esValido = false;
-        mensaje = 'Error al procesar QR';
+        mensaje = 'Error al procesar QR ';
       });
     }
   }
