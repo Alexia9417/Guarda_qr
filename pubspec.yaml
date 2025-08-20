@@ -33,5 +33,8 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  adaptive_icon_background: "#FFFFFF"     
-  adaptive_icon_foreground: "assets/guarda_seguridad.jpg"
+  # iOS necesita un image_path; puedes usar el mismo PNG
+  image_path: "assets/CUC.png"                # 1024x1024
+  # Android: adaptive icon
+  adaptive_icon_background: "#FFFFFF"         # o "assets/logo_background.png"
+  adaptive_icon_foreground: "assets/CUC.png" 
