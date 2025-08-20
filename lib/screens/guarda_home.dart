@@ -37,7 +37,23 @@ class _GuardaHomeState extends State<GuardaHome> {
           IconButton(
             tooltip: 'Abrir cámara (escáner QR)',
             icon: const Icon(Icons.photo_camera, color: Colors.white),
-            onPressed: () {
+            onPressed: () async {
+              final prov = context.read<GuardaProvider>();
+              final bytes = await prov.descargarFotoPorEmail(widget.guardaId);
+
+              if (bytes == null || bytes.isEmpty) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'No puede usar la app hasta registrar su fotografía.',
+                      ),
+                    ),
+                  );
+                }
+                return;
+              }
+
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ScannGuarda()),
@@ -52,7 +68,7 @@ class _GuardaHomeState extends State<GuardaHome> {
               if (context.mounted) {
                 Navigator.pushNamedAndRemoveUntil(
                   context,
-                  '/login': (_) => const LoginState(),
+                  '/login',
                   (route) => false,
                 );
               }

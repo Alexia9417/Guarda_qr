@@ -32,7 +32,7 @@ class MainApp extends StatelessWidget {
         initialRoute: '/login',
 
         routes: {
-          '/login': (_) => const LoginGuardas(),
+          '/login': (_) => const Login(),
           '/home': (ctx) {
             final guardaId = ModalRoute.of(ctx)!.settings.arguments as String;
             return GuardaHome(guardaId: guardaId);
