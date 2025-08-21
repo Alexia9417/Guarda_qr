@@ -21,7 +21,9 @@ class QRUsuario {
     return QRUsuario(
       nombreCompleto: json['NombreCompleto'] ?? '',
       identificacion: json['Identificacion'] ?? '',
-      tipoUsuarioDescripcion: json['TipoUsuario'] ?? '',
+      tipoUsuarioDescripcion: json['TipoUsuario'] ??
+                            json['tipoUsuario'] ??
+                            '',
       carreras: List<String>.from(json['Carreras'] ?? []),
       areas: List<String>.from(json['Areas'] ?? []),
       fechaVencimiento: DateTime.parse(json['FechaVencimiento']),
@@ -29,6 +31,7 @@ class QRUsuario {
     
   }
   
+  //Funcion para validar 
   bool coincideCon(Usuario otro) {
     final idCoincide =
         _normalizar(identificacion) == _normalizar(otro.identificacion);

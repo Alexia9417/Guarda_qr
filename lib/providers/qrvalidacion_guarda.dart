@@ -29,8 +29,21 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
   Future<void> _validarQR() async {
     try {
-      // Decodificar el JSON del QR
-      final Map<String, dynamic> jsonQR = jsonDecode(widget.qrData);
+      String corregirEncoding(String texto) {
+        try {
+          final bytes = texto.codeUnits;
+          return utf8.decode(bytes);
+        } catch (_) {
+          return texto; // Si falla, devolver el original
+        }
+      }
+
+      //Correcion de datos en el qr
+      final contenidoCorregido = corregirEncoding(widget.qrData);
+
+      // Decodificar el JSON del QR ya corregido
+      final Map<String, dynamic> jsonQR = jsonDecode(contenidoCorregido);
+
       final usuarioQR = QRUsuario.fromJson(jsonQR);
 
       // Función para construir el email del usuario
@@ -97,7 +110,11 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       // Si no hay usuario cargado, mostrar error
       if (usuarioBD != null && usuarioQR.coincideCon(usuarioBD)) {
         await audioPlayer.stop(); // Detener cualquier reproducción previa
-        await reproducirYDetener(audioPlayer, 'sonido_success.wav', Duration(seconds: 5));
+        await reproducirYDetener(
+          audioPlayer,
+          'sonido_success.wav',
+          Duration(seconds: 5),
+        );
         setState(() {
           esValido = true;
           mensaje = 'Usuario válido';
