@@ -26,16 +26,17 @@ class _ScannGuardaState extends State<ScannGuarda> {
 
       try {
         // ✅ Forzar decodificación UTF-8 para caracteres especiales
-        final utf8Fixed = utf8.decode(raw.codeUnits);
+        //final utf8Fixed = utf8.decode(raw.codeUnits);
 
+        final fixed = raw;
         // Validar que sea JSON válido
-        jsonDecode(utf8Fixed);
+        jsonDecode(fixed);
 
         // Navegar con el string corregido
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => QrvalidacionGuarda(qrData: utf8Fixed),
+            builder: (context) => QrvalidacionGuarda(qrData: fixed),
           ),
         ).then((_) {
           if (mounted) {
