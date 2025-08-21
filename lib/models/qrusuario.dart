@@ -25,7 +25,7 @@ class QRUsuario {
       nombreCompleto: json['NombreCompleto'] ?? '',
       identificacion: json['Identificacion'] ?? '',
       tipoUsuarioDescripcion:
-          json['TipoUsuarioDescripcion'] ?? json['TipoUsuario'] ?? '',
+          json['TipoUsuario'] ?? json['tipoUsuario'] ?? '',
       carreras: List<String>.from(json['Carreras'] ?? []),
       areas: List<String>.from(json['Areas'] ?? []),
       fechaVencimiento: (json['FechaVencimiento'] != null &&

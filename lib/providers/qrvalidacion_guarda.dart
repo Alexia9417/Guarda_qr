@@ -41,28 +41,29 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
   Future<void> _validarQR() async {
     try {
-      print('📦 QR recibido (raw): ${widget.qrData}');
-
-      // Decodificar el QR asegurando acentos y ñ correctamente
+      //print('📦 QR recibido (raw): ${widget.qrData}');
+      //Se intenta decodificar directamente como JSON
       dynamic contenido = jsonDecode(widget.qrData);
-
-      // Si viene como string escapado, decodificar una vez más
-      final Map<String, dynamic> jsonQR =
-          (contenido is String) ? jsonDecode(contenido) : contenido;
-
-      print('✅ Contenido final: ${jsonQR['NombreCompleto']}');
+      //Si es un string, se intenta decodificarlo nuevamente (por si es un JSON escapado)
+      final Map<String, dynamic> jsonQR = (contenido is String)
+          ? jsonDecode(contenido)
+          : contenido;
+      //print('✅ Contenido final: ${jsonQR['NombreCompleto']}');
 
       final usuarioQR = QRUsuario.fromJson(jsonQR);
 
       // Construcción del email
       String construirEmail(String id, String tipo) {
-        final sufijo =
-            tipo.toLowerCase() == 'estudiante' ? '@cuc.cr' : '@cuc.ac.cr';
+        final sufijo = tipo.toLowerCase() == 'estudiante'
+            ? '@cuc.cr'
+            : '@cuc.ac.cr';
         return '$id$sufijo';
       }
 
-      final usuarioProvider =
-          Provider.of<UsuarioProvider>(context, listen: false);
+      final usuarioProvider = Provider.of<UsuarioProvider>(
+        context,
+        listen: false,
+      );
 
       final email = construirEmail(
         usuarioQR.identificacion,
@@ -72,7 +73,11 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       await usuarioProvider.cargarPorId(email);
 
       if (usuarioProvider.error != null) {
-        await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
+        await reproducirYDetener(
+          audioPlayer,
+          'sonido_error.mp3',
+          Duration(seconds: 3),
+        );
         setState(() {
           esValido = false;
           mensaje = 'Error: ${usuarioProvider.error}';
@@ -82,7 +87,11 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
 
       if (usuarioQR.fechaVencimiento == null ||
           usuarioQR.fechaVencimiento!.isBefore(DateTime.now())) {
-        await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
+        await reproducirYDetener(
+          audioPlayer,
+          'sonido_error.mp3',
+          Duration(seconds: 3),
+        );
         setState(() {
           esValido = false;
           mensaje = 'QR expirado';
@@ -93,24 +102,36 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
       final usuarioBD = usuarioProvider.usuario;
 
       if (usuarioBD != null && usuarioQR.coincideCon(usuarioBD)) {
-        await reproducirYDetener(audioPlayer, 'sonido_success.wav', Duration(seconds: 5));
+        await reproducirYDetener(
+          audioPlayer,
+          'sonido_success.wav',
+          Duration(seconds: 5),
+        );
         setState(() {
           esValido = true;
-          mensaje = '✅ Usuario válido';
+          mensaje = 'Usuario válido';
         });
       } else {
-        await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
+        await reproducirYDetener(
+          audioPlayer,
+          'sonido_error.mp3',
+          Duration(seconds: 3),
+        );
         setState(() {
           esValido = false;
           mensaje = 'Usuario inválido';
         });
       }
     } catch (e) {
-      print('❌ Error al procesar QR: $e');
-      await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
+      //print('❌ Error al procesar QR: $e');
+      await reproducirYDetener(
+        audioPlayer,
+        'sonido_error.mp3',
+        Duration(seconds: 3),
+      );
       setState(() {
         esValido = false;
-        mensaje = 'Error al procesar QR';
+        mensaje = 'Error al procesar QR: ${e.toString()}';
       });
     }
   }
@@ -120,14 +141,14 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
     final Color fondo = esValido == null
         ? Colors.grey.shade300
         : esValido!
-            ? Colors.green.shade100
-            : Colors.red.shade100;
+        ? Colors.green.shade100
+        : Colors.red.shade100;
 
     final Color borde = esValido == null
         ? Colors.grey
         : esValido!
-            ? Colors.green.shade700
-            : Colors.red.shade700;
+        ? Colors.green.shade700
+        : Colors.red.shade700;
 
     return Scaffold(
       backgroundColor: kAzul,

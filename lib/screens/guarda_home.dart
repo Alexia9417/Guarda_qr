@@ -32,7 +32,7 @@ class _GuardaHomeState extends State<GuardaHome> {
       appBar: AppBar(
         backgroundColor: kAzul,
         elevation: 0,
-        title: const Text('Mi perfil', style: TextStyle(color: Colors.white)),
+        //title: const Text('Mi perfil', style: TextStyle(color: Colors.white)),
         actions: [
           FutureBuilder<Uint8List?>(
             future: context.read<GuardaProvider>().descargarFotoPorEmail(

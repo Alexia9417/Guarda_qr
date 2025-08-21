@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:guardas_seguridad/providers/qrvalidacion_guarda.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:guardas_seguridad/providers/qrvalidacion_guarda.dart';
 
 const kAzul = Color(0xFF003466);
 
@@ -16,27 +16,40 @@ class _ScannGuardaState extends State<ScannGuarda> {
   bool _isProcessing = false;
 
   void _onDetect(BarcodeCapture capture) {
-    if (_isProcessing) return;
-
-    final barcode = capture.barcodes.first;
-    final String? raw = barcode.rawValue;
-
-    if (raw != null) {
-      setState(() => _isProcessing = true);
-
+  if (_isProcessing) return;
+  final barcode = capture.barcodes.first;
+  final String? raw = barcode.rawValue;
+  if (raw != null) {
+    setState(() => _isProcessing = true);
+    try {
+      //Se intenta decodificar directamente como JSON
+      dynamic contenido = jsonDecode(raw);
+      //Si es un Map, se convierte a string para pasarlo a la siguiente pantalla
+      String qrData = (contenido is Map) ? jsonEncode(contenido) : raw;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QrvalidacionGuarda(qrData: qrData),
+        ),
+      ).then((_) {
+        if (mounted) {
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) {
+              setState(() => _isProcessing = false);
+            }
+          });
+        }
+      });
+    } catch (e) {
+      // 2. Si falla, intenta decodificar como UTF-8
       try {
-        // ✅ Forzar decodificación UTF-8 para caracteres especiales
-        //final utf8Fixed = utf8.decode(raw.codeUnits);
-
-        final fixed = raw;
-        // Validar que sea JSON válido
-        jsonDecode(fixed);
-
-        // Navegar con el string corregido
+        final utf8Fixed = utf8.decode(raw.runes.toList());
+        dynamic contenido = jsonDecode(utf8Fixed);
+        String qrData = (contenido is Map) ? jsonEncode(contenido) : utf8Fixed;
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => QrvalidacionGuarda(qrData: fixed),
+            builder: (context) => QrvalidacionGuarda(qrData: qrData),
           ),
         ).then((_) {
           if (mounted) {
@@ -55,11 +68,12 @@ class _ScannGuardaState extends State<ScannGuarda> {
               backgroundColor: Colors.red,
             ),
           );
+          setState(() => _isProcessing = false);
         }
-        setState(() => _isProcessing = false);
       }
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +87,7 @@ class _ScannGuardaState extends State<ScannGuarda> {
         children: [
           MobileScanner(onDetect: _onDetect),
 
-          // Cuadro guía con solo el borde
+          // Cuadro guía con borde
           Center(
             child: SizedBox(
               width: 250,
