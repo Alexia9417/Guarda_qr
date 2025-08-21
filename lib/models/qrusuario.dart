@@ -1,13 +1,15 @@
+import 'dart:convert';
+import 'package:diacritic/diacritic.dart';
 import 'package:guardas_seguridad/models/usuario.dart';
-
+ 
 class QRUsuario {
   final String nombreCompleto;
   final String identificacion;
   final String tipoUsuarioDescripcion;
   final List<String> carreras;
   final List<String> areas;
-  final DateTime fechaVencimiento;
-
+  final DateTime? fechaVencimiento;
+ 
   QRUsuario({
     required this.nombreCompleto,
     required this.identificacion,
@@ -16,42 +18,66 @@ class QRUsuario {
     required this.areas,
     required this.fechaVencimiento,
   });
-
+ 
+  /// Construir desde JSON
   factory QRUsuario.fromJson(Map<String, dynamic> json) {
     return QRUsuario(
       nombreCompleto: json['NombreCompleto'] ?? '',
       identificacion: json['Identificacion'] ?? '',
-      tipoUsuarioDescripcion: json['TipoUsuario'] ??
-                            json['tipoUsuario'] ??
-                            '',
+      tipoUsuarioDescripcion:
+          json['TipoUsuarioDescripcion'] ?? json['TipoUsuario'] ?? '',
       carreras: List<String>.from(json['Carreras'] ?? []),
       areas: List<String>.from(json['Areas'] ?? []),
-      fechaVencimiento: DateTime.parse(json['FechaVencimiento']),
+      fechaVencimiento: (json['FechaVencimiento'] != null &&
+              json['FechaVencimiento'].toString().isNotEmpty)
+          ? DateTime.tryParse(json['FechaVencimiento'])
+          : null,
     );
-    
   }
-  
-  //Funcion para validar 
+ 
+  /// Serializar a JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'NombreCompleto': nombreCompleto,
+      'Identificacion': identificacion,
+      'TipoUsuario': tipoUsuarioDescripcion,
+      'Carreras': carreras,
+      'Areas': areas,
+      'FechaVencimiento': fechaVencimiento?.toIso8601String(),
+    };
+  }
+ 
+  /// Versión del objeto con todos los textos normalizados
+  QRUsuario normalizado() {
+    return QRUsuario(
+      nombreCompleto: _normalizar(nombreCompleto),
+      identificacion: _normalizar(identificacion),
+      tipoUsuarioDescripcion: _normalizar(tipoUsuarioDescripcion),
+      carreras: _normalizarLista(carreras),
+      areas: _normalizarLista(areas),
+      fechaVencimiento: fechaVencimiento,
+    );
+  }
+ 
+  /// Comparación con otro usuario (ignorando mayúsculas/tildes/espacios)
   bool coincideCon(Usuario otro) {
-    final idCoincide =
-        _normalizar(identificacion) == _normalizar(otro.identificacion);
-    final tipoCoincide =
-        _normalizar(tipoUsuarioDescripcion) == _normalizar(otro.tipoUsuario);
-    final nombreCoincide =
-        _normalizar(nombreCompleto) == _normalizar(otro.nombreCompleto);
-
-    return idCoincide && tipoCoincide && nombreCoincide;
+    final qrNorm = normalizado();
+ 
+    return qrNorm.identificacion == _normalizar(otro.identificacion) &&
+        qrNorm.tipoUsuarioDescripcion == _normalizar(otro.tipoUsuario) &&
+        qrNorm.nombreCompleto == _normalizar(otro.nombreCompleto);
   }
-
+ 
+  /// Normaliza un texto: quita tildes, ñ → n, lowercase, espacios simples
   String _normalizar(String texto) {
-    return texto
+    return removeDiacritics(texto)
         .trim()
         .toLowerCase()
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .replaceAll(RegExp(r'[áÁ]'), 'a')
-        .replaceAll(RegExp(r'[éÉ]'), 'e')
-        .replaceAll(RegExp(r'[íÍ]'), 'i')
-        .replaceAll(RegExp(r'[óÓ]'), 'o')
-        .replaceAll(RegExp(r'[úÚ]'), 'u');
+        .replaceAll(RegExp(r'\s+'), ' ');
+  }
+ 
+  /// Normaliza listas completas
+  List<String> _normalizarLista(List<String> lista) {
+    return lista.map((e) => _normalizar(e)).toList();
   }
 }

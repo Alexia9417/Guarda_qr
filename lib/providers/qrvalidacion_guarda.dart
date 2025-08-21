@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:guardas_seguridad/models/qrusuario.dart';
 import 'package:provider/provider.dart';
-import '../models/qrusuario.dart';
 import '../providers/usuario_provider.dart';
 
 const kAzul = Color(0xFF003466);
@@ -27,114 +27,90 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
     _validarQR();
   }
 
+  Future<void> reproducirYDetener(
+    AudioPlayer player,
+    String assetPath,
+    Duration duracion,
+  ) async {
+    await player.stop();
+    await player.play(AssetSource(assetPath));
+    Future.delayed(duracion, () async {
+      await player.stop();
+    });
+  }
+
   Future<void> _validarQR() async {
     try {
-      String corregirEncoding(String texto) {
-        try {
-          final bytes = texto.codeUnits;
-          return utf8.decode(bytes);
-        } catch (_) {
-          return texto; // Si falla, devolver el original
-        }
-      }
+      print('📦 QR recibido (raw): ${widget.qrData}');
 
-      //Correcion de datos en el qr
-      final contenidoCorregido = corregirEncoding(widget.qrData);
+      // Decodificar el QR asegurando acentos y ñ correctamente
+      dynamic contenido = jsonDecode(widget.qrData);
 
-      // Decodificar el JSON del QR ya corregido
-      final Map<String, dynamic> jsonQR = jsonDecode(contenidoCorregido);
+      // Si viene como string escapado, decodificar una vez más
+      final Map<String, dynamic> jsonQR =
+          (contenido is String) ? jsonDecode(contenido) : contenido;
+
+      print('✅ Contenido final: ${jsonQR['NombreCompleto']}');
 
       final usuarioQR = QRUsuario.fromJson(jsonQR);
 
-      // Función para construir el email del usuario
+      // Construcción del email
       String construirEmail(String id, String tipo) {
-        final sufijo = tipo.toLowerCase() == 'estudiante'
-            ? '@cuc.cr'
-            : '@cuc.ac.cr';
+        final sufijo =
+            tipo.toLowerCase() == 'estudiante' ? '@cuc.cr' : '@cuc.ac.cr';
         return '$id$sufijo';
       }
 
-      // Obtener el proveedor de Usuario
-      final usuarioProvider = Provider.of<UsuarioProvider>(
-        context,
-        listen: false,
-      );
+      final usuarioProvider =
+          Provider.of<UsuarioProvider>(context, listen: false);
 
-      // Construir el email del usuario basado en la identificación y tipo
       final email = construirEmail(
         usuarioQR.identificacion,
         usuarioQR.tipoUsuarioDescripcion,
       );
 
-      // Cargar el usuario desde el proveedor
       await usuarioProvider.cargarPorId(email);
 
-      // Verificar si hubo error al cargar el usuario
       if (usuarioProvider.error != null) {
-        await audioPlayer.stop(); // Detener cualquier reproducción previa
-        await audioPlayer.play(AssetSource('sonido_error.mp3'));
+        await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
         setState(() {
           esValido = false;
-          mensaje = '${usuarioProvider.error}';
+          mensaje = 'Error: ${usuarioProvider.error}';
         });
         return;
       }
 
-      // Verificar fecha de vencimiento
-      if (usuarioQR.fechaVencimiento.isBefore(DateTime.now())) {
-        await audioPlayer.stop(); // Detener cualquier reproducción previa
-        await audioPlayer.play(AssetSource('sonido_error.mp3'));
+      if (usuarioQR.fechaVencimiento == null ||
+          usuarioQR.fechaVencimiento!.isBefore(DateTime.now())) {
+        await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
         setState(() {
           esValido = false;
           mensaje = 'QR expirado';
         });
         return;
       }
-      // Validar coincidencia con el usuario cargado
+
       final usuarioBD = usuarioProvider.usuario;
 
-      //
-      Future<void> reproducirYDetener(
-        AudioPlayer player,
-        String assetPath,
-        Duration duracion,
-      ) async {
-        await player.stop(); // Por si hay algo sonando
-        await player.play(AssetSource(assetPath));
-
-        Future.delayed(duracion, () async {
-          await player.stop();
-        });
-      }
-
-      // Si no hay usuario cargado, mostrar error
       if (usuarioBD != null && usuarioQR.coincideCon(usuarioBD)) {
-        await audioPlayer.stop(); // Detener cualquier reproducción previa
-        await reproducirYDetener(
-          audioPlayer,
-          'sonido_success.wav',
-          Duration(seconds: 5),
-        );
+        await reproducirYDetener(audioPlayer, 'sonido_success.wav', Duration(seconds: 5));
         setState(() {
           esValido = true;
-          mensaje = 'Usuario válido';
+          mensaje = '✅ Usuario válido';
         });
       } else {
-        // Si no coincide, mostrar error
-        await audioPlayer.stop(); // Detener cualquier reproducción previa
-        await audioPlayer.play(AssetSource('sonido_error.mp3'));
+        await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
         setState(() {
           esValido = false;
           mensaje = 'Usuario inválido';
         });
       }
     } catch (e) {
-      // Manejar errores de decodificación o validación
-      await audioPlayer.stop(); // Detener cualquier reproducción previa
-      await audioPlayer.play(AssetSource('sonido_error.mp3'));
+      print('❌ Error al procesar QR: $e');
+      await reproducirYDetener(audioPlayer, 'sonido_error.mp3', Duration(seconds: 3));
       setState(() {
         esValido = false;
-        mensaje = 'Error al procesar QR ';
+        mensaje = 'Error al procesar QR';
       });
     }
   }
@@ -144,14 +120,14 @@ class _QrvalidacionGuardaState extends State<QrvalidacionGuarda> {
     final Color fondo = esValido == null
         ? Colors.grey.shade300
         : esValido!
-        ? Colors.green.shade100
-        : Colors.red.shade100;
+            ? Colors.green.shade100
+            : Colors.red.shade100;
 
     final Color borde = esValido == null
         ? Colors.grey
         : esValido!
-        ? Colors.green.shade700
-        : Colors.red.shade700;
+            ? Colors.green.shade700
+            : Colors.red.shade700;
 
     return Scaffold(
       backgroundColor: kAzul,

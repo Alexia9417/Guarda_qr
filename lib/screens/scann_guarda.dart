@@ -25,36 +25,38 @@ class _ScannGuardaState extends State<ScannGuarda> {
       setState(() => _isProcessing = true);
 
       try {
-        jsonDecode(raw); // Validar que sea JSON válido
-      } catch (_) {
+        // ✅ Forzar decodificación UTF-8 para caracteres especiales
+        final utf8Fixed = utf8.decode(raw.codeUnits);
+
+        // Validar que sea JSON válido
+        jsonDecode(utf8Fixed);
+
+        // Navegar con el string corregido
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => QrvalidacionGuarda(qrData: utf8Fixed),
+          ),
+        ).then((_) {
+          if (mounted) {
+            Future.delayed(const Duration(seconds: 1), () {
+              if (mounted) {
+                setState(() => _isProcessing = false);
+              }
+            });
+          }
+        });
+      } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(
-                'QR inválido. No contiene datos en formato esperado.',
-              ),
+              content: Text('QR inválido o con caracteres corruptos.'),
               backgroundColor: Colors.red,
             ),
           );
         }
-        setState(() => _isProcessing = false); // Resetear estado
-        return;
+        setState(() => _isProcessing = false);
       }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => QrvalidacionGuarda(qrData: raw),
-        ),
-      ).then((_) {
-        if (mounted) {
-          Future.delayed(const Duration(seconds: 1), () {
-            if (mounted) {
-              setState(() => _isProcessing = false);
-            }
-          });
-        }
-      });
     }
   }
 
@@ -62,8 +64,9 @@ class _ScannGuardaState extends State<ScannGuarda> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kAzul,
-      appBar: AppBar(title: const Text('Escáner QR', style: TextStyle(color: Colors.white)),
-      backgroundColor: kAzul,
+      appBar: AppBar(
+        title: const Text('Escáner QR', style: TextStyle(color: Colors.white)),
+        backgroundColor: kAzul,
       ),
       body: Stack(
         children: [
@@ -85,10 +88,7 @@ class _ScannGuardaState extends State<ScannGuarda> {
             right: 0,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: kAzul,
                   borderRadius: BorderRadius.circular(8),
